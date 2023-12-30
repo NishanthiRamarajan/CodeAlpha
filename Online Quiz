@@ -1,0 +1,182 @@
+package CodeAlpha;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class OnlineQuizPlatform {
+
+    private JFrame frame;
+    private JLabel questionLabel;
+    private JRadioButton option1, option2, option3, option4;
+    private ButtonGroup buttonGroup;
+    private JButton buttonNext;
+
+    private String[] questions = {
+            "What is the main function of the 'public static void main(String[] args)' method in Java?",
+            "Which keyword is used to declare a constant in Java?",
+            "What is the purpose of the 'new' keyword in Java?",
+            "How is an interface different from a class in Java?",
+            "What is the significance of the 'static' keyword in Java?"
+    };
+
+    private String[][] options = {
+            { "To define the entry point of the program", "To declare a variable", "To perform mathematical operations",
+                    "To create an object", "To define the entry point of the program" },
+            { "const", "final", "static", "var", "final" },
+            { "To allocate memory for an object", "To create a new class", "To declare a variable",
+                    "To print output to the console", "To allocate memory for an object" },
+            { "An interface is a blueprint for a class, and it can have only abstract methods.",
+                    "A class is a blueprint for an interface, and it can have both abstract and concrete methods.",
+                    "An interface can have instance variables, whereas a class cannot.",
+                    "A class can extend multiple interfaces, but an interface can only extend one class.",
+                    "An interface is a blueprint for a class, and it can have only abstract methods." },
+            { "It is used to declare a constant variable.", "It is used to create an instance of a class.",
+                    "It is used to declare a method as non-static.", "It is used to define a class as abstract.",
+                    "It is used to declare a method or variable as static." }
+    };
+
+    private int index = 0;
+    private int correct = 0;
+
+    public OnlineQuizPlatform() {
+        frame = new JFrame("Online Quiz Platform");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        questionLabel = new JLabel("", SwingConstants.CENTER);
+        option1 = new JRadioButton();
+        option2 = new JRadioButton();
+        option3 = new JRadioButton();
+        option4 = new JRadioButton();
+        buttonGroup = new ButtonGroup();
+        buttonNext = new JButton("Next");
+
+        buttonGroup.add(option1);
+        buttonGroup.add(option2);
+        buttonGroup.add(option3);
+        buttonGroup.add(option4);
+
+        buttonNext.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkAnswerAndDisplayNext();
+            }
+        });
+
+        JPanel questionPanel = new JPanel(new BorderLayout());
+        questionPanel.add(questionLabel, BorderLayout.CENTER);
+
+        JPanel optionsPanel = new JPanel(new GridLayout(4, 1));
+        optionsPanel.add(option1);
+        optionsPanel.add(option2);
+        optionsPanel.add(option3);
+        optionsPanel.add(option4);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(questionPanel, BorderLayout.CENTER);
+        mainPanel.add(optionsPanel, BorderLayout.SOUTH);
+
+        frame.add(mainPanel, BorderLayout.CENTER);
+        frame.add(buttonNext, BorderLayout.SOUTH);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = (int) screenSize.getWidth();
+        int screenHeight = (int) screenSize.getHeight();
+        int frameWidth = 600;
+        int frameHeight = 400;
+        int x = (screenWidth - frameWidth) / 2;
+        int y = (screenHeight - frameHeight) / 2;
+
+        frame.setSize(frameWidth, frameHeight);
+        frame.setLocation(x, y);
+
+        displayNextQuestion();
+        frame.setVisible(true);
+    }
+
+    private void disableButtons(boolean state) {
+        option1.setEnabled(state);
+        option2.setEnabled(state);
+        option3.setEnabled(state);
+        option4.setEnabled(state);
+    }
+
+    private void checkAnswerAndDisplayNext() {
+        AbstractButton selectedButton = getSelectedButton();
+        if (selectedButton != null) {
+            String selectedAnswer = selectedButton.getText();
+            if (selectedAnswer.equals(options[index][4])) {
+                correct++;
+                JOptionPane.showMessageDialog(frame, "Correct!", "Feedback", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Incorrect!", "Feedback", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(frame, "Please select an answer.", "Validation Error",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        index++;
+        if (index == questions.length) {
+            showResult();
+        } else {
+            displayNextQuestion();
+        }
+    }
+
+    private void showResult() {
+        questionLabel.setText("Result: " + correct + " / " + questions.length);
+        disableButtons(false);
+
+        if (correct >= questions.length / 2) {
+            questionLabel.setBackground(Color.GREEN);
+        } else {
+            questionLabel.setBackground(Color.RED);
+        }
+
+        buttonNext.setText("Restart");
+        index = 0;
+        correct = 0;
+    }
+
+    private AbstractButton getSelectedButton() {
+        if (option1.isSelected()) {
+            return option1;
+        } else if (option2.isSelected()) {
+            return option2;
+        } else if (option3.isSelected()) {
+            return option3;
+        } else if (option4.isSelected()) {
+            return option4;
+        } else {
+            return null;
+        }
+    }
+
+    private void displayNextQuestion() {
+        questionLabel.setText(questions[index]);
+
+        disableButtons(true);
+        option1.setText(options[index][0]);
+        option2.setText(options[index][1]);
+        option3.setText(options[index][2]);
+        option4.setText(options[index][3]);
+        option1.setSelected(true);
+
+        if (index == questions.length - 1) {
+            buttonNext.setText("Check the Results");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new OnlineQuizPlatform();
+            }
+        });
+    }
+}
